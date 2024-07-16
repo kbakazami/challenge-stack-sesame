@@ -1,12 +1,12 @@
 // @generated automatically by Diesel CLI.
 
 pub mod sql_types {
-    #[derive(diesel::query_builder::QueryId, Clone, diesel::sql_types::SqlType)]
-    #[diesel(postgres_type(name = "geometry"))]
-    pub struct Geometry;
 }
 
 diesel::table! {
+    use diesel::sql_types::*;
+    use postgis_diesel::sql_types::*;
+
     access (id) {
         id -> Uuid,
         #[max_length = 255]
@@ -21,6 +21,9 @@ diesel::table! {
 }
 
 diesel::table! {
+    use diesel::sql_types::*;
+    use postgis_diesel::sql_types::*;
+
     feedback (id) {
         id -> Uuid,
         #[max_length = 100]
@@ -34,6 +37,9 @@ diesel::table! {
 }
 
 diesel::table! {
+    use diesel::sql_types::*;
+    use postgis_diesel::sql_types::*;
+
     logs (id) {
         id -> Int4,
         #[sql_name = "type"]
@@ -45,6 +51,9 @@ diesel::table! {
 }
 
 diesel::table! {
+    use diesel::sql_types::*;
+    use postgis_diesel::sql_types::*;
+
     role (id) {
         id -> Int4,
         #[max_length = 50]
@@ -53,6 +62,9 @@ diesel::table! {
 }
 
 diesel::table! {
+    use diesel::sql_types::*;
+    use postgis_diesel::sql_types::*;
+
     spatial_ref_sys (srid) {
         srid -> Int4,
         #[max_length = 256]
@@ -67,7 +79,7 @@ diesel::table! {
 
 diesel::table! {
     use diesel::sql_types::*;
-    use super::sql_types::Geometry;
+    use postgis_diesel::sql_types::*;
 
     toilet (id) {
         id -> Uuid,
@@ -82,6 +94,9 @@ diesel::table! {
 }
 
 diesel::table! {
+    use diesel::sql_types::*;
+    use postgis_diesel::sql_types::*;
+
     users (id) {
         id -> Uuid,
         civility -> Int4,
