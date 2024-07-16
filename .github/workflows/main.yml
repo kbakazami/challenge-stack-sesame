@@ -1,0 +1,12 @@
+name: back-workflow
+on:
+  pull_request_review:
+    branches: ["front-dev", "back-dev"]
+    types: [submitted]
+
+jobs:
+  approved:
+    if: github.event.review.state == 'APPROVED'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "This PR was approved"
