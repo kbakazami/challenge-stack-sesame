@@ -1,7 +1,9 @@
 name: main-workflow
 on:
   pull_request_review:
-    branches: [front-dev, back-dev]
+    branches:
+      - fron-dev
+      - back-dev
     types: [submitted]
 
 jobs:
