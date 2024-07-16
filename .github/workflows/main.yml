@@ -12,3 +12,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "This PR was approved"
+      - uses: actions/checkout@v4.1.7
