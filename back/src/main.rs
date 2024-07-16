@@ -9,6 +9,7 @@ use std::env;
 mod services;
 mod controllers;
 mod models;
+mod schema;
 
 #[derive(Clone)]
 struct AppState {
