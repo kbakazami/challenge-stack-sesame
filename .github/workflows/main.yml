@@ -89,6 +89,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with: 
           workspaces: ./back
+          save-if: ${{ github.ref == 'refs/heads/staging' }}
 
       - run: |
           cargo check
