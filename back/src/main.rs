@@ -135,14 +135,17 @@ async fn main() -> std::io::Result<()> {
                             "/getNbPassage",
                             web::get().to(stat_controllers::get_log_nb_passage),
                         ),
-                ).service(
-                    web::scope("/users")
+                )
+            .service(web::scope("/users")
                         .wrap(middlewares::auth_middleware::AuthMiddleware)
                         .route("/new", web::post().to(users_controllers::create_user))
                         .route("/{id}", web::get().to(users_controllers::get_user)),
-                ).service(web::scope("/role").route("/", web::get().to(role_controllers::get_roles))),
-            ).service(
-              web::scope("/ws")
+                )
+            .service(web::scope("/role")
+                .wrap(middlewares::auth_middleware::AuthMiddleware)
+                .route("", web::get().to(role_controllers::get_roles))),
+            )
+            .service(web::scope("/ws")
                    .route("", web::get().to(echo_ws))
             )
     })
