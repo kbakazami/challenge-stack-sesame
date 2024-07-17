@@ -8,6 +8,7 @@ pub async fn googlecallback(data: web::Data<AppState>, params: web::Query<AuthRe
     let token_result = client.exchange_code(AuthorizationCode::new(params.code.clone()))
         .request_async(async_http_client)
         .await;
+    
 
     match token_result {
         Ok(token) => HttpResponse::Ok().json(token.access_token()),
