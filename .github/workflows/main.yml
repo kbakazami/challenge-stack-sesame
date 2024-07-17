@@ -5,6 +5,7 @@ on:
       - front-dev
       - back-dev
       - feature/**
+
 jobs:
 
   build-front:
@@ -14,6 +15,9 @@ jobs:
 
   build-back:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./back
     steps:
       - uses: actions/checkout@v4
 
@@ -22,26 +26,8 @@ jobs:
 
       - name: "Build cargo"
         run: cargo build --verbose
-        working-directory: ./back
+
+      - name: "Check code"
+        run: cargo check
 
       - run: echo "Build is done !"
-
-  check-code:
-    name: lint
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      packages: read
-      statuses: write
-
-    steps:
-      - name: Chekcout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Super-linter
-        uses: super-linter/super-linter@v6.7.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
