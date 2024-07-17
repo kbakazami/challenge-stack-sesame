@@ -9,7 +9,10 @@ on:
 jobs:
 
   build-front:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     defaults:
       run:
         working-directory: ./front
@@ -33,14 +36,17 @@ jobs:
 
       # Build IOS.
       - name: Build IOS
+        if: ${{ matrix.os == 'macos-latest' }}
         run: flutter build ios --release --no-codesign
 
       # Build Web
       - name: Build Web
+        if: ${{ matrix.os == 'ubutnu-latest' }}
         run: flutter build web
 
       # Build Android apk
       - name: Build Android
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
           flutter build apk
           flutter build appbundle
