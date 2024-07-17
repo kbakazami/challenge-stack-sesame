@@ -10,7 +10,7 @@ pub async fn create_user(
     {
         Ok(inserted_user) => HttpResponse::Created().json(inserted_user),
         Err(err) => {
-            HttpResponse::InternalServerError().body(format!("Failed to insert logs: {}", err))
+            HttpResponse::InternalServerError().body(format!("Failed to insert user: {}", err))
         }
     }
 }
