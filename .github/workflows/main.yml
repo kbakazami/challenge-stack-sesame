@@ -1,15 +1,92 @@
 name: main-workflow
 on:
-  pull_request_review:
-    types: [submitted]
+  push:
     branches:
-      - front-dev
-      - back-dev
+      - staging
 
 jobs:
-  approved:
-    if: github.event.review.state == 'approved'
+
+  detect_changes:
     runs-on: ubuntu-latest
+    outputs:
+      back: ${{ steps.filter.outputs.back }}
+      front: ${{ steps.filter.outputs.front }}
     steps:
-      - run: echo "This PR was approved"
       - uses: actions/checkout@v4
+
+      - name: Filter changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            back:
+              - 'back/**'
+            front:
+              - 'front/**'
+
+  build-front:
+    needs: detect_changes
+    if: needs.detect_changes.outputs.front == 'true'
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: ./front
+    steps:
+      - uses: actions/checkout@v4
+
+      # Setup flutter
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.19.5
+          cache: true
+
+      # Get flutter dependecnies
+      - run: flutter pub get
+
+      # Statically analyze the Dart code for any errors.
+      - run: flutter analyze
+
+      # Run widget tests for our flutter project.
+      - run: flutter test
+
+      # Build IOS.
+      - name: Build IOS
+        if: ${{ matrix.os == 'macos-latest' }}
+        run: flutter build ios --release --no-codesign
+
+      # Build Web
+      - name: Build Web
+        if: ${{ matrix.os == 'ubutnu-latest' }}
+        run: flutter build web
+
+      # Build Android apk
+      - name: Build Android
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: |
+          flutter build apk
+          flutter build appbundle
+
+
+
+  build-back:
+    needs: detect_changes
+    if: needs.detect_changes.outputs.back == 'true'
+    runs-on: ubuntu-latest
+
+    env:
+      CARGO_TERM_COLOR: always
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: rustup toolchain install stable --profile minimal --no-self-update
+
+      - run: |
+          cargo check
+          cargo test
+          cargo build --release
+        working-directory: ./back
