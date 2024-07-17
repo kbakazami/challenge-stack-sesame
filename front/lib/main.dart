@@ -15,6 +15,12 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
+        fontFamily: 'Poppins',
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(),
+          bodySmall: TextStyle(),
+          bodyMedium: TextStyle(),
+        ),
       ),
       home: const HomePage(),
     );
