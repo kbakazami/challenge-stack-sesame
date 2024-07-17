@@ -2,9 +2,7 @@ name: main-workflow
 on:
   push:
     branches:
-      - front-dev
-      - back-dev
-      - feature/**
+      - staging
 
 jobs:
 
