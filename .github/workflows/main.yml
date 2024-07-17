@@ -16,6 +16,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: rustup update
-      - run: cargo build --verbose
+
+      - name: "Rustup update"
+        run: rustup update
+
+      - name: "Build cargo"
+        run: cargo build --verbose
+        working-directory: ./back
+
       - run: echo "Build is done !"
