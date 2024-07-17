@@ -1,15 +1,21 @@
 name: main-workflow
 on:
-  pull_request_review:
-    types: [submitted]
+  push:
     branches:
       - front-dev
       - back-dev
 
 jobs:
-  approved:
-    if: github.event.review.state == 'approved'
+
+  build-front:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "This PR was approved"
       - uses: actions/checkout@v4
+
+  build-back:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup update
+      - run: cargo build --verbose
+      - run: echo "Build is done !"
