@@ -25,3 +25,23 @@ jobs:
         working-directory: ./back
 
       - run: echo "Build is done !"
+
+  check-code:
+    name: lint
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: read
+      statuses: write
+
+    steps:
+      - name: Chekcout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Super-linter
+        uses: super-linter/super-linter@v6.7.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
