@@ -14,6 +14,7 @@ mod controllers;
 mod models;
 mod schema;
 mod websocket;
+mod middlewares;
 
 
 /// WebSocket handshake and start `MyWebSocket` actor.
@@ -116,9 +117,8 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(cors)
             .app_data(web::Data::new(state.clone()))
-            .service(
-                web::scope("/api").service(
-                    web::scope("/auth")
+            .service(web::scope("/api")
+            .service(web::scope("/auth")
                         .route(
                             "/login",
                             web::get().to(controllers::auth_controllers::login),
@@ -127,24 +127,25 @@ async fn main() -> std::io::Result<()> {
                             "/google_callback",
                             web::get().to(controllers::auth_controllers::googlecallback),
                         ),
-                ),
+                )
+            .service(web::scope("/stats")
+                        .wrap(middlewares::auth_middleware::AuthMiddleware)
+                        .route("/new", web::post().to(stat_controllers::create_log))
+                        .route(
+                            "/getNbPassage",
+                            web::get().to(stat_controllers::get_log_nb_passage),
+                        ),
+                )
+            .service(web::scope("/users")
+                        .wrap(middlewares::auth_middleware::AuthMiddleware)
+                        .route("/new", web::post().to(users_controllers::create_user))
+                        .route("/{id}", web::get().to(users_controllers::get_user)),
+                )
+            .service(web::scope("/role")
+                .wrap(middlewares::auth_middleware::AuthMiddleware)
+                .route("", web::get().to(role_controllers::get_roles))),
             )
-            .service(
-                web::scope("/api/stats")
-                    .route("/new", web::post().to(stat_controllers::create_log))
-                    .route(
-                        "/getNbPassage",
-                        web::get().to(stat_controllers::get_log_nb_passage),
-                    ),
-            )
-            .service(
-                web::scope("/api/users")
-                    .route("/new", web::post().to(users_controllers::create_user))
-                    .route("/{id}", web::get().to(users_controllers::get_user)),
-            )
-            .service(web::scope("/api/role").route("/", web::get().to(role_controllers::get_roles)))
-            .service(
-              web::scope("/ws")
+            .service(web::scope("/ws")
                    .route("", web::get().to(echo_ws))
             )
     })
