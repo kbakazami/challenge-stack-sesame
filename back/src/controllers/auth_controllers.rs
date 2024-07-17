@@ -5,6 +5,7 @@ use crate::{models::auth::AuthRequest, AppState};
 
 pub async fn googlecallback(data: web::Data<AppState>, params: web::Query<AuthRequest>)  -> impl Responder {
     let client = &data.oauth;
+    let test = 0;
     let token_result = client.exchange_code(AuthorizationCode::new(params.code.clone()))
         .request_async(async_http_client)
         .await;
