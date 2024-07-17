@@ -1,6 +1,15 @@
 version: "3.8"
 
 services:
+  grafana:
+    image: grafana/grafana-enterprise
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    volumes:
+      - grafana-storage:/var/lib/grafana
+
   postgres:
     image: postgis/postgis:16-3.4
     environment:
@@ -35,3 +44,4 @@ networks:
 
 volumes:
   postgres_data:
+  grafana-storage: {}
