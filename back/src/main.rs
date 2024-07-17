@@ -1,16 +1,25 @@
 use actix_cors::Cors;
-use actix_web::{web, App, HttpServer};
+use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
+use actix_web_actors::ws;
 use controllers::{role_controllers, stat_controllers, users_controllers};
 use diesel::prelude::*;
 use diesel::r2d2::{self, ConnectionManager};
 use oauth2::{basic::BasicClient, AuthUrl, ClientId, ClientSecret, RedirectUrl, TokenUrl};
 use r2d2::Pool;
+use websocket::server::MyWebSocket;
 use ::r2d2::PooledConnection;
 use std::env;
 
 mod controllers;
 mod models;
 mod schema;
+mod websocket;
+
+
+/// WebSocket handshake and start `MyWebSocket` actor.
+async fn echo_ws(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, Error> {
+    ws::start(MyWebSocket::new(), &req, stream)
+}
 
 #[derive(Clone)]
 struct GoogleAuthConfig {
@@ -134,6 +143,10 @@ async fn main() -> std::io::Result<()> {
                     .route("/{id}", web::get().to(users_controllers::get_user)),
             )
             .service(web::scope("/api/role").route("/", web::get().to(role_controllers::get_roles)))
+            .service(
+              web::scope("/ws")
+                   .route("", web::get().to(echo_ws))
+            )
     })
     .bind(("0.0.0.0", 8080))?
     .run()
