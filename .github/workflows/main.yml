@@ -24,12 +24,8 @@ jobs:
 
       - run: rustup toolchain install stable --profile minimal --no-self-update
 
-      - uses: /back
-        with:
-          workspaces: tests
-
       - run: |
           cargo check
           cargo test
           cargo build --release
-        working-directory: tests
+        working-directory: ./back
