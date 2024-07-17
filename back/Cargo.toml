@@ -24,3 +24,6 @@ awc = "3.5.0"
 futures-util = "0.3.30"
 tokio = { version = "1.38.1", features = ["full"] }
 tokio-stream = "0.1.15"
+futures = "0.3.30"
+actix-service = "2.0.2"
+reqwest = { version = "0.12.5", features = ["json"] }

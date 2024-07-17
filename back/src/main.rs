@@ -20,6 +20,7 @@ mod websocket;
 async fn echo_ws(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, Error> {
     ws::start(MyWebSocket::new(), &req, stream)
 }
+mod middlewares;
 
 #[derive(Clone)]
 struct GoogleAuthConfig {
