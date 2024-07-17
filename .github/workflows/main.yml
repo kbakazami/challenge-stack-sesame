@@ -4,7 +4,7 @@ on:
     branches:
       - front-dev
       - back-dev
-
+      - feature/**
 jobs:
 
   build-front:
