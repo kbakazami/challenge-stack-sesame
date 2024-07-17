@@ -1,15 +1,23 @@
 use actix_cors::Cors;
-use actix_web::{web, App, HttpServer};
-use controllers::hello_world_controllers::hello_world;
+use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
+use actix_web_actors::ws;
 use diesel::prelude::*;
 use diesel::r2d2::{self, ConnectionManager};
 use r2d2::Pool;
+use websocket::server::MyWebSocket;
 use std::env;
 
 mod services;
 mod controllers;
 mod models;
 mod schema;
+mod websocket;
+
+
+/// WebSocket handshake and start `MyWebSocket` actor.
+async fn echo_ws(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, Error> {
+    ws::start(MyWebSocket::new(), &req, stream)
+}
 
 #[derive(Clone)]
 struct AppState {
@@ -48,8 +56,9 @@ async fn main() -> std::io::Result<()>{
     .wrap(cors)
     .app_data(web::Data::new(state.clone())) 
     .service(web::scope("/api")
-        .route("", web::get().to(hello_world))
-)
+    )
+    .service(web::scope("/ws")
+        .route("", web::get().to(echo_ws)))
     })
     .bind(("0.0.0.0", 8080))?
     .run()
