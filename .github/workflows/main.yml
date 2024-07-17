@@ -8,7 +8,27 @@ on:
 
 jobs:
 
+  detect_changes:
+    runs-on: ubuntu-latest
+    outputs:
+      back: ${{ steps.filter.outputs.back }}
+      front: ${{ steps.filter.outputs.front }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Filter changes
+        id: filter
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            back:
+              - 'back/**'
+            front:
+              - 'front/**'
+
   build-front:
+    needs: detect_changes
+    if: needs.detect_changes.outputs.front == 'true'
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
@@ -55,6 +75,8 @@ jobs:
 
 
   build-back:
+    needs: detect_changes
+    if: needs.detect_changes.outputs.back == 'true'
     runs-on: ubuntu-latest
 
     env:
