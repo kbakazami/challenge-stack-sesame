@@ -10,7 +10,6 @@ actix-web = "4.8.0"
 diesel = { version = "2.2.1", features = ["postgres", "r2d2", "chrono", "uuid"] }
 dotenv = "0.15.0"
 env_logger = "0.11.3"
-google-oauth = "1.11.0"
 oauth2 = "4.4.2"
 r2d2 = "0.8.10"
 serde = { version = "1.0.203", features = ["derive"] }

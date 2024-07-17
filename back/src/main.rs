@@ -13,7 +13,7 @@ mod models;
 mod schema;
 
 #[derive(Clone)]
-struct GoogleAuth {
+struct GoogleAuthConfig {
     client_id: String,
     client_secret: String,
 }
@@ -35,17 +35,17 @@ fn get_pool() -> PostgresPool {
         .expect("could not build connection pool")
 }
 
-fn get_googl_auth() -> GoogleAuth {
+fn get_googl_auth() -> GoogleAuthConfig {
     dotenv::dotenv().ok();
     let client_id = env::var("CLIENT_ID").expect("GOOGLE_CLIENT_ID must be set");
     let client_secret = env::var("CLIENT_SECRET").expect("GOOGLE_CLIENT_SECRET must be set");
-    return GoogleAuth {
+    return GoogleAuthConfig {
         client_id,
         client_secret,
     }
 }
 
-fn build_oauth_client(google_auth: GoogleAuth) -> BasicClient {
+fn build_oauth_client(google_auth: GoogleAuthConfig) -> BasicClient {
 
     let redirect_url = "http://localhost:8080/api/auth/google_callback".to_string();
 

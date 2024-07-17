@@ -1,14 +1,7 @@
 use actix_web::{web, HttpResponse, Responder};
 use oauth2::{reqwest::async_http_client, AuthorizationCode, CsrfToken, Scope, TokenResponse};
-use serde::Deserialize;
 
-use crate::AppState;
-
-#[derive(Deserialize)]
-pub struct AuthRequest {
-    code: String,
-    state: String,
-}
+use crate::{models::auth::AuthRequest, AppState};
 
 pub async fn googlecallback(data: web::Data<AppState>, params: web::Query<AuthRequest>)  -> impl Responder {
     let client = &data.oauth;
@@ -23,7 +16,7 @@ pub async fn googlecallback(data: web::Data<AppState>, params: web::Query<AuthRe
 }
 
 pub async fn login(data: web::Data<AppState>) -> impl Responder {
-    let (authorize_url, csrf_token) = data.oauth
+    let (authorize_url, _csrf_token) = data.oauth
         .authorize_url(CsrfToken::new_random)
         .add_scope(Scope::new("profile".to_string()))
         .add_scope(Scope::new("email".to_string()))
