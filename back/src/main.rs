@@ -21,7 +21,7 @@ struct GoogleAuth {
 #[derive(Clone)]
 struct AppState {
     conn: Pool<ConnectionManager<PgConnection>>,
-    oauth: BasicClient,
+    oauth: oauth2::Client<oauth2::StandardErrorResponse<oauth2::basic::BasicErrorResponseType>, oauth2::StandardTokenResponse<oauth2::EmptyExtraTokenFields, oauth2::basic::BasicTokenType>, oauth2::basic::BasicTokenType, oauth2::StandardTokenIntrospectionResponse<oauth2::EmptyExtraTokenFields, oauth2::basic::BasicTokenType>, oauth2::StandardRevocableToken, oauth2::StandardErrorResponse<oauth2::RevocationErrorResponseType>>,
 }
 
 pub type PostgresPool = Pool<ConnectionManager<PgConnection>>;
@@ -45,9 +45,9 @@ fn get_googl_auth() -> GoogleAuth {
     }
 }
 
-pub fn build_oauth_client(google_auth: GoogleAuth) -> BasicClient {
+fn build_oauth_client(google_auth: GoogleAuth) -> BasicClient {
 
-    let redirect_url = "http://localhost:8000/api".to_string();
+    let redirect_url = "http://localhost:8080/api/auth/google_callback".to_string();
 
      let auth_url = AuthUrl::new("https://accounts.google.com/o/oauth2/v2/auth".to_string())
      .expect("Auth url not set up");
@@ -85,10 +85,12 @@ async fn main() -> std::io::Result<()>{
     App::new()
     .wrap(cors)
     .app_data(web::Data::new(state.clone()))
-    .route("", web::get().to(hello_world))
     .service(web::scope("/api")
-        .service(web::scope("/auth"))
+    .route("", web::get().to(hello_world))
+        .service(web::scope("/auth")
+        .route("/login", web::get().to(controllers::auth_controllers::login))
         .route("/google_callback", web::get().to(controllers::auth_controllers::googlecallback))
+    )
 )
     })
     .bind(("0.0.0.0", 8080))?

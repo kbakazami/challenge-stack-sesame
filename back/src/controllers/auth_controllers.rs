@@ -1,23 +1,35 @@
-use actix_session::Session;
 use actix_web::{web, HttpResponse, Responder};
-use oauth2::{AuthorizationCode, CsrfToken};
+use oauth2::{reqwest::async_http_client, AuthorizationCode, CsrfToken, Scope, TokenResponse};
 use serde::Deserialize;
-use crate::{AppState};
+
+use crate::AppState;
 
 #[derive(Deserialize)]
 pub struct AuthRequest {
     code: String,
     state: String,
-    scope: String,
 }
 
-pub async fn googlecallback(session: Session,data: web::Data<AppState>, params: web::Query<AuthRequest>) -> impl Responder {
-    let code = AuthorizationCode::new(params.code.clone());
-    let state = CsrfToken::new(params.state.clone());
-    let _scope = params.scope.clone();
+pub async fn googlecallback(data: web::Data<AppState>, params: web::Query<AuthRequest>)  -> impl Responder {
+    let client = &data.oauth;
+    let token_result = client.exchange_code(AuthorizationCode::new(params.code.clone()))
+        .request_async(async_http_client)
+        .await;
 
-    // Exchange the code with a token.
-    let token = &data.oauth.exchange_code(code);
+    match token_result {
+        Ok(token) => HttpResponse::Ok().json(token.access_token()),
+        Err(err) => HttpResponse::InternalServerError().body(format!("Error: {:?}", err)),
+    }
+}
 
-    HttpResponse::Ok().json(token.)
+pub async fn login(data: web::Data<AppState>) -> impl Responder {
+    let (authorize_url, csrf_token) = data.oauth
+        .authorize_url(CsrfToken::new_random)
+        .add_scope(Scope::new("profile".to_string()))
+        .add_scope(Scope::new("email".to_string()))
+        .url();
+
+    HttpResponse::Found()
+        .append_header(("Location", authorize_url.to_string()))
+        .finish()
 }
