@@ -1,28 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:front/providers/auth.dart';
+import 'package:front/providers/user.dart';
 import 'package:front/views/homepage/homepage.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+import 'constants/colors.dart';
+
+Future<void> main() async {
+  await dotenv.load(fileName: ".env");
+
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+
+  final AuthProvider authProvider = AuthProvider();
+  final UserProvider userProvider = UserProvider();
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Sésame POC',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        fontFamily: 'Poppins',
-        textTheme: const TextTheme(
-          bodyLarge: TextStyle(),
-          bodySmall: TextStyle(),
-          bodyMedium: TextStyle(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: authProvider),
+        ChangeNotifierProvider.value(value: userProvider),
+      ],
+      child: MaterialApp(
+        title: 'Sésame POC',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          useMaterial3: true,
+          colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
+          fontFamily: 'Poppins',
+          textTheme: const TextTheme(
+            bodyLarge: TextStyle(),
+            bodySmall: TextStyle(),
+            bodyMedium: TextStyle(),
+          ),
         ),
+        home: const HomePage(),
       ),
-      home: const HomePage(),
     );
   }
 }
