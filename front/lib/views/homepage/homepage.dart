@@ -104,6 +104,10 @@ class _HomePageState extends State<HomePage> {
       onGenerateRoute: (RouteSettings setting) {
         if(setting.name != "/") {
           switch(setting.name) {
+            case "bathrooms-list" :
+              _selectedIndex = 0;
+              return MaterialPageRoute(builder: (_) => const BathroomsList());
+
             case "login":
               return MaterialPageRoute(builder: (_) => const Login());
 
