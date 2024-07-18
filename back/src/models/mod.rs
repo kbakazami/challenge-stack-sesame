@@ -5,3 +5,4 @@ pub mod access;
 pub mod feedback;
 pub mod role;
 pub mod auth;
+pub mod toiletStatus;
