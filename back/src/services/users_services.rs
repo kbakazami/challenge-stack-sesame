@@ -3,11 +3,7 @@ use diesel::{prelude::*, r2d2::ConnectionManager, result::Error};
 use r2d2::PooledConnection;
 
 use crate::models::users::{NewUsers, Users, UsersWithoutToken};
-use crate::schema::users::dsl::{id, users};
-use crate::schema::users::{birthdate, civility};
-use crate::models::users::{NewUsers, Users};
-use crate::schema::users::dsl::{users, id};
-use crate::schema::users::{email, token};
+use crate::schema::users::dsl::{id, users, birthdate, civility, email, token};
 
 pub async fn create_user(
     mut conn: PooledConnection<ConnectionManager<PgConnection>>,

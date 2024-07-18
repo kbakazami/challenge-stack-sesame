@@ -2,7 +2,7 @@ use ::r2d2::PooledConnection;
 use actix_cors::Cors;
 use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
 use actix_web_actors::ws;
-use controllers::{feedback_controllers, role_controllers, stat_controllers, users_controllers,toilet_controllers};
+use controllers::{feedback_controllers, role_controllers, stat_controllers, toilet_controllers, users_controllers};
 use diesel::prelude::*;
 use diesel::r2d2::{self, ConnectionManager};
 use r2d2::Pool;
@@ -69,20 +69,13 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(state.clone()))
             .service(
                 web::scope("/api")
+                    .wrap(middlewares::auth_middleware::AuthMiddleware)
                     .service(
                         web::scope("/auth")
-                            .route(
-                                "/login",
-                                web::get().to(controllers::auth_controllers::login),
-                            )
-                            .route(
-                                "/google_callback",
-                                web::get().to(controllers::auth_controllers::googlecallback),
-                            ),
+                            .route("/verify", web::post().to(controllers::auth_controllers::verify))
                     )
                     .service(
                         web::scope("/stats")
-                            .wrap(middlewares::auth_middleware::AuthMiddleware)
                             .route("/new", web::post().to(stat_controllers::create_log))
                             .route(
                                 "/get_nb_passage",
@@ -95,7 +88,6 @@ async fn main() -> std::io::Result<()> {
                     )
                     .service(
                         web::scope("/users")
-                            .wrap(middlewares::auth_middleware::AuthMiddleware)
                             .route("/new", web::post().to(users_controllers::create_user))
                             .route("/{id}", web::delete().to(users_controllers::delete_user))
                             .route("/{id}", web::get().to(users_controllers::get_user))
@@ -107,7 +99,6 @@ async fn main() -> std::io::Result<()> {
                     )
                     .service(
                         web::scope("/toilets")
-                            .wrap(middlewares::auth_middleware::AuthMiddleware)
                             .route("/", web::get().to(toilet_controllers::get_toilets))
                             .route("/{id}", web::get().to(toilet_controllers::get_toilet))
                             .route("/new", web::post().to(toilet_controllers::create_toilet))
@@ -117,12 +108,10 @@ async fn main() -> std::io::Result<()> {
                     )
                     .service(
                         web::scope("/role")
-                            .wrap(middlewares::auth_middleware::AuthMiddleware)
                             .route("", web::get().to(role_controllers::get_roles)),
                     )
                     .service(
                         web::scope("/feedback")
-                            .wrap(middlewares::auth_middleware::AuthMiddleware)
                             .route(
                                 "/new",
                                 web::post().to(feedback_controllers::create_feedback),
