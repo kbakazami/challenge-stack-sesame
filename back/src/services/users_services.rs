@@ -5,6 +5,9 @@ use r2d2::PooledConnection;
 use crate::models::users::{NewUsers, Users, UsersWithoutToken};
 use crate::schema::users::dsl::{id, users};
 use crate::schema::users::{birthdate, civility};
+use crate::models::users::{NewUsers, Users};
+use crate::schema::users::dsl::{users, id};
+use crate::schema::users::{email, token};
 
 pub async fn create_user(
     mut conn: PooledConnection<ConnectionManager<PgConnection>>,
@@ -23,6 +26,39 @@ pub async fn create_user(
     diesel::insert_into(users)
         .values(new_user)
         .get_result::<Users>(&mut conn)
+}
+
+pub async fn upsert_user(
+    mut conn: PooledConnection<ConnectionManager<PgConnection>>,
+    new_user: NewUsers,
+) -> Result<usize, Error> {
+    let new_user = NewUsers {
+        firstname: new_user.firstname,
+        lastname: new_user.lastname,
+        civility: new_user.civility,
+        birthdate: new_user.birthdate,
+        email: new_user.email,
+        token: new_user.token,
+        role_id: new_user.role_id,
+    };
+
+    let get_user_email: Result<Users, Error> = users.filter(email.eq(&new_user.email))
+        .get_result::<Users>(&mut conn);
+
+
+    match get_user_email {
+        Ok(user) => {
+            diesel::update(users)
+                .filter(email.eq(&user.email))
+                .set(token.eq(new_user.token.clone()))
+                .execute(&mut conn)
+        }
+        Err(_) => {
+            diesel::insert_into(users)
+                .values(&new_user)
+                .execute(&mut conn)
+        }
+    }
 }
 
 pub async fn get_user(
