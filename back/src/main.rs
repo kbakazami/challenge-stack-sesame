@@ -1,21 +1,20 @@
+use ::r2d2::PooledConnection;
 use actix_cors::Cors;
 use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
 use actix_web_actors::ws;
-use controllers::{role_controllers, stat_controllers, users_controllers};
+use controllers::{role_controllers, stat_controllers, toilet_controllers, users_controllers};
 use diesel::prelude::*;
 use diesel::r2d2::{self, ConnectionManager};
 use oauth2::{basic::BasicClient, AuthUrl, ClientId, ClientSecret, RedirectUrl, TokenUrl};
 use r2d2::Pool;
-use websocket::server::MyWebSocket;
-use ::r2d2::PooledConnection;
 use std::env;
+use websocket::websocket::MyWebSocket;
 
 mod controllers;
+mod middlewares;
 mod models;
 mod schema;
 mod websocket;
-mod middlewares;
-
 
 /// WebSocket handshake and start `MyWebSocket` actor.
 async fn echo_ws(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, Error> {
@@ -45,8 +44,7 @@ struct AppState {
 }
 impl AppState {
     pub fn get_conn(&self) -> PooledConnection<ConnectionManager<PgConnection>> {
-        self
-            .conn
+        self.conn
             .get()
             .expect("Failed to get a connection from the pool.")
     }
@@ -117,37 +115,51 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(cors)
             .app_data(web::Data::new(state.clone()))
-            .service(web::scope("/api")
-            .service(web::scope("/auth")
-                        .route(
-                            "/login",
-                            web::get().to(controllers::auth_controllers::login),
-                        )
-                        .route(
-                            "/google_callback",
-                            web::get().to(controllers::auth_controllers::googlecallback),
-                        ),
-                )
-            .service(web::scope("/stats")
-                        .wrap(middlewares::auth_middleware::AuthMiddleware)
-                        .route("/new", web::post().to(stat_controllers::create_log))
-                        .route(
-                            "/getNbPassage",
-                            web::get().to(stat_controllers::get_log_nb_passage),
-                        ),
-                )
-            .service(web::scope("/users")
-                        .wrap(middlewares::auth_middleware::AuthMiddleware)
-                        .route("/new", web::post().to(users_controllers::create_user))
-                        .route("/{id}", web::get().to(users_controllers::get_user)),
-                )
-            .service(web::scope("/role")
-                .wrap(middlewares::auth_middleware::AuthMiddleware)
-                .route("", web::get().to(role_controllers::get_roles))),
+            .service(
+                web::scope("/api")
+                    .service(
+                        web::scope("/auth")
+                            .route(
+                                "/login",
+                                web::get().to(controllers::auth_controllers::login),
+                            )
+                            .route(
+                                "/google_callback",
+                                web::get().to(controllers::auth_controllers::googlecallback),
+                            ),
+                    )
+                    .service(
+                        web::scope("/stats")
+                            .wrap(middlewares::auth_middleware::AuthMiddleware)
+                            .route("/new", web::post().to(stat_controllers::create_log))
+                            .route(
+                                "/getNbPassage",
+                                web::get().to(stat_controllers::get_log_nb_passage),
+                            ),
+                    )
+                    .service(
+                        web::scope("/users")
+                            .wrap(middlewares::auth_middleware::AuthMiddleware)
+                            .route("/new", web::post().to(users_controllers::create_user))
+                            .route("/{id}", web::get().to(users_controllers::get_user)),
+                    )
+                    .service(
+                        web::scope("/toilets")
+                            .wrap(middlewares::auth_middleware::AuthMiddleware)
+                            .route("/", web::get().to(toilet_controllers::get_toilets))
+                            .route("/{id}", web::get().to(toilet_controllers::get_toilet))
+                            .route("/new", web::post().to(toilet_controllers::create_toilet))
+                            .route("/{id}/open", web::put().to(toilet_controllers::open_toilet))
+                            .route("/{id}/close",web::put().to(toilet_controllers::close_toilet))
+                            .route("/{id}/delete", web::delete().to(toilet_controllers::delete_toilet))
+                    )
+                    .service(
+                        web::scope("/role")
+                            .wrap(middlewares::auth_middleware::AuthMiddleware)
+                            .route("", web::get().to(role_controllers::get_roles)),
+                    ),
             )
-            .service(web::scope("/ws")
-                   .route("", web::get().to(echo_ws))
-            )
+            .service(web::scope("/ws").route("", web::get().to(echo_ws)))
     })
     .bind(("0.0.0.0", 8080))?
     .run()

@@ -2,7 +2,7 @@ use diesel::{prelude::*, r2d2::ConnectionManager, result::Error};
 use r2d2::PooledConnection;
 
 use crate::{
-    models::logs::{Logs, NewLogs},
+    models::{logs::{Logs, NewLogs}, toiletStatus::ToiletStatus},
     schema::{
         logs::{
             creationdate,
@@ -11,20 +11,6 @@ use crate::{
         toilet::dsl::{id as id_toilet, toilet},
     },
 };
-
-#[derive(Debug, PartialEq, Clone)]
-pub enum ToiletStatus {
-    Utilise = 1,
-    Libre = 2,
-    EnCoursDeNettoyage = 3,
-    EnCoursDeMaintenance = 4,
-}
-
-impl ToiletStatus {
-    pub fn id(&self) -> i32 {
-        self.clone() as i32
-    }
-}
 
 pub async fn create_log(
     mut conn: PooledConnection<ConnectionManager<PgConnection>>,
@@ -46,7 +32,7 @@ pub async fn get_log_nb_passage(
 ) -> Result<Vec<(String, i32)>, Error> {
     let formatted_results = match logs
         .inner_join(toilet.on(toilet_id.eq(id_toilet)))
-        .filter(type_.eq(ToiletStatus::Utilise.id()))
+        .filter(type_.eq(ToiletStatus::Used.id()))
         .group_by(creationdate)
         .select((creationdate, diesel::dsl::count(id)))
         .load::<(chrono::NaiveDateTime, i64)>(&mut conn)
