@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:front/constants/colors.dart';
+import 'package:googleapis/admob/v1.dart';
+import 'package:provider/provider.dart';
+import '../../models/user.dart';
+import '../../providers/user.dart';
 
 class Account extends StatelessWidget {
 
@@ -9,61 +13,70 @@ class Account extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final User? user = Provider.of<UserProvider>(context).user;
     return Scaffold(
       extendBody: true,
       body: Align(
         alignment: Alignment.center,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              SizedBox(height: 10),
-              CircleAvatar(
-                radius: 40,
-                backgroundColor: Colors.white,
-                child: Icon(Icons.person, size: 50, color: Colors.black),
-              ),
-              SizedBox(height: 10),
-              Text(
-                'John Doe',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 30),
-              _buildInputField('Nom et prénom :', 'John Doe'),
-              _buildInputField('E-mail :', 'John@Doe.com'),
-              SizedBox(height: 60),
-              ElevatedButton.icon(
-
-                onPressed: () {
-                  // Ajouter la logique pour supprimer le compte ici
-                },
-
-                icon: Icon(Icons.warning, color: Colors.red),
-                label: Text(
-                  'Supprimer mon compte',
-                  style: TextStyle(color: Colors.red),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-
-                  side: BorderSide(color: Colors.red),
-
-                  shape: RoundedRectangleBorder(
-
-                    borderRadius: BorderRadius.circular(10),
-
+          padding: const EdgeInsets.symmetric(horizontal: 15),
+          child: Builder(builder: (context) {
+            if(user != null) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  SizedBox(height: 10),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(100),
+                    child: Image.network(user.photoUrl as String),
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 25, horizontal: 20),
-
-                ),
-
-              ) ,
-              SizedBox(height: 30),
-            ],
-          ),
+                  SizedBox(height: 10),
+                  Text(
+                    user.username as String,
+                    style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
+                  ),
+                  Text(user.email as String),
+                  SizedBox(height: 80),
+                  ElevatedButton.icon(
+                    onPressed: () {},
+                    icon: Icon(Icons.phone, color: AppColors.primary),
+                    label: Text(
+                      'Contacter l\'administration',
+                      style: TextStyle(color: AppColors.primary),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      side: BorderSide(color: AppColors.primary),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 25, horizontal: 20),
+                    ),
+                  ),
+                  SizedBox(height: 15),
+                  ElevatedButton.icon(
+                    onPressed: () {},
+                    icon: Icon(Icons.warning, color: Colors.red),
+                    label: Text(
+                      'Supprimer mon compte',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      side: BorderSide(color: Colors.red),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 25, horizontal: 20),
+                    ),
+                  ),
+                ],
+              );
+            }
+            return Text("Une erreur est survenue veuillez réessayer.");
+          }),
         ),
       )
     );
