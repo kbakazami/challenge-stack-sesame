@@ -3,3 +3,4 @@ pub mod stat_controllers;
 pub mod users_controllers;
 pub mod role_controllers;
 pub mod toilet_controllers;
+pub mod feedback_controllers;
