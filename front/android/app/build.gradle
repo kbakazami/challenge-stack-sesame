@@ -42,7 +42,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.front"
-        minSdkVersion 21
+        minSdkVersion flutter.minSdkVersion // Assurez-vous que la version minimale du SDK est au moins
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
