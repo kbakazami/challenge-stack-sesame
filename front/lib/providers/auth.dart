@@ -8,6 +8,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       final response = await _googleSignIn.signIn();
       final auth = await response?.authentication;
+      final token = auth.accessToken;
     } catch (error) {
       print(error); // ignore: avoid_print
     }

@@ -20,6 +20,7 @@ class _LoginState extends State<Login> {
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     clientId: dotenv.get("CLIENT_ID"),
+    scopes: ["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/user.gender.read", "https://www.googleapis.com/auth/user.birthday.read"],
   );
 
   late Map<String, dynamic> _currentUser;
