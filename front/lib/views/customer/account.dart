@@ -10,64 +10,62 @@ class Account extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: IconThemeData(color: Colors.black),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            SizedBox(height: 10),
-            CircleAvatar(
-              radius: 40,
-              backgroundColor: Colors.white,
-              child: Icon(Icons.person, size: 50, color: Colors.black),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'John Doe',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 30),
-            _buildInputField('Nom et prénom :', 'John Doe'),
-            _buildDatePickerField(context, 'Date de naissance :'),
-            _buildDropdownField('Genre :'),
-            _buildInputField('E-mail :', 'John@Doe.com'),
-            SizedBox(height: 60),
-            ElevatedButton.icon(
-
-              onPressed: () {
-                   // Ajouter la logique pour supprimer le compte ici
-              },
-
-              icon: Icon(Icons.warning, color: Colors.red),
-              label: Text(
-                'Supprimer mon compte',
-                style: TextStyle(color: Colors.red),
-              ),
-              style: ElevatedButton.styleFrom(
+      extendBody: true,
+      body: Align(
+        alignment: Alignment.center,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              SizedBox(height: 10),
+              CircleAvatar(
+                radius: 40,
                 backgroundColor: Colors.white,
-
-                side: BorderSide(color: Colors.red),
-
-                shape: RoundedRectangleBorder(
-
-                  borderRadius: BorderRadius.circular(10),
-
-                     ),
-                padding: EdgeInsets.symmetric(vertical: 25, horizontal: 20),
-
+                child: Icon(Icons.person, size: 50, color: Colors.black),
               ),
+              SizedBox(height: 10),
+              Text(
+                'John Doe',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 30),
+              _buildInputField('Nom et prénom :', 'John Doe'),
+              _buildInputField('E-mail :', 'John@Doe.com'),
+              SizedBox(height: 60),
+              ElevatedButton.icon(
 
-            ) ,
-            SizedBox(height: 30),
-          ],
+                onPressed: () {
+                  // Ajouter la logique pour supprimer le compte ici
+                },
+
+                icon: Icon(Icons.warning, color: Colors.red),
+                label: Text(
+                  'Supprimer mon compte',
+                  style: TextStyle(color: Colors.red),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+
+                  side: BorderSide(color: Colors.red),
+
+                  shape: RoundedRectangleBorder(
+
+                    borderRadius: BorderRadius.circular(10),
+
+                  ),
+                  padding: EdgeInsets.symmetric(vertical: 25, horizontal: 20),
+
+                ),
+
+              ) ,
+              SizedBox(height: 30),
+            ],
+          ),
         ),
-      ),
+      )
     );
   }
 
