@@ -15,8 +15,8 @@ use crate::{
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum ToiletStatus {
-    Utilise = 1, //demande fermeture / demande réouverture
-    Libre = 2,   //demande ouverture
+    Utilise = 1,
+    Libre = 2,
     EnCoursDeNettoyage = 3,
     EnCoursDeMaintenance = 4,
 }
