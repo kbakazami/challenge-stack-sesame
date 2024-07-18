@@ -16,7 +16,7 @@ pub struct Users {
     pub role_id: i32
 }
 
-#[derive(Insertable, Deserialize, Serialize)]
+#[derive(Insertable, Deserialize, Serialize, Clone, Debug)]
 #[diesel(table_name = crate::schema::users)]
 pub struct NewUsers {
     pub civility: i32,
