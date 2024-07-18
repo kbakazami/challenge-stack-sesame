@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';
 import 'package:nfc_manager/nfc_manager.dart';
+import 'package:app_settings/app_settings.dart';
 
 class QrCode extends StatefulWidget {
   const QrCode({Key? key}) : super(key: key);
@@ -10,86 +10,79 @@ class QrCode extends StatefulWidget {
 }
 
 class _QrCodeState extends State<QrCode> {
-  late CameraController _controller;
-  late Future<void> _initializeControllerFuture;
+  bool isNFCActive = false;
 
   @override
   void initState() {
     super.initState();
-    _initializeCamera();
-  }
-
-  Future<void> _initializeCamera() async {
-    final cameras = await availableCameras();
-    final firstCamera = cameras.last;
-
-    _controller = CameraController(
-      firstCamera,
-      ResolutionPreset.medium,
-    );
-
-    _initializeControllerFuture = _controller.initialize();
-    if (mounted) {
-      setState(() {});
-    }
+    // await _checkNFCPermission();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
     super.dispose();
   }
 
   Future<void> _checkNFCPermission() async {
     bool isAvailable = await NfcManager.instance.isAvailable();
     if (isAvailable) {
-      print('NFC is available.');
-      NfcManager.instance.startSession(
-        onDiscovered: (NfcTag tag) async {
-          print('NFC tag found: ${tag.data}');
-          NfcManager.instance.stopSession();
-          // Ajoutez ici la logique pour traiter les tags NFC
-        },
-      );
+      isNFCActive = true;
     } else {
-      print('NFC is not available.');
+      isNFCActive = false;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Scanner le QR Code')),
-      body: FutureBuilder<void>(
-        future: _initializeControllerFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 16.0), // Espace en haut
-                ElevatedButton(
-                  onPressed: _checkNFCPermission,
-                  child: const Text('Utiliser le NFC'),
-                ),
-                const SizedBox(height: 16.0), // Espace entre le bouton et la caméra
-                Center(
-                  child: Container(
-                    margin: const EdgeInsets.all(16.0), // Marges pour créer les bords
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black, width: 4.0), // Bordures
-                    ),
-                    child: CameraPreview(_controller),
-                  ),
-                ),
-              ],
-            );
-          } else {
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
-      ),
+      extendBody: true,
+      appBar: AppBar(title: const Text('Utilisation de l\'application')),
+      body: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10),
+        child: Align(
+          alignment: Alignment.center,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 10),
+              const Text("Étape 1 - Choisir vos sanitaires", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18)),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () => Navigator.pushNamed(context, "bathrooms-list"),
+                child: const Text('Voir la liste des sanitaires'),
+              ),
+              const SizedBox(height: 40),
+              const Text("Étape 2 - Vérifier que le NFC est activé", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18)),
+              const SizedBox(height: 10),
+              Builder(builder: (context) {
+                if(isNFCActive) {
+                  return const Text("NFC activé");
+                }
+                return const Text("NFC Désactivé");
+              }),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () => AppSettings.openAppSettings(type: AppSettingsType.nfc),
+                child: const Text('Activer le NFC'),
+              ),
+              const SizedBox(height: 40),
+              const Text("Étape 3 - Ouvrir la porte", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),),
+              const SizedBox(height: 10),
+              const Text('Scanner le boîtier à l\'aide de votre téléphone afin d\'ouvrir la porte du sanitaire.', textAlign: TextAlign.center),
+              const SizedBox(height: 40),
+              const Text("Étape 4 - Fermer la porte", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),),
+              const SizedBox(height: 10),
+              const Text('Scanner le boîtier à l\'aide de votre téléphone à l\'intérieur afin de fermer la porte du sanitaire.', textAlign: TextAlign.center),
+              const SizedBox(height: 40),
+              const Text("Étape 5 - Quitter le sanitaire", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),),
+              const SizedBox(height: 10),
+              const Text('Scanner le boîtier à l\'aide de votre téléphone à l\'intérieur afin d\'ouvrir la porte et quitter le sanitaire.', textAlign: TextAlign.center),
+              const SizedBox(height: 40),
+            ],
+          ),
+        ),
+      )
     );
   }
 }
