@@ -29,10 +29,13 @@ diesel::table! {
         #[max_length = 100]
         title -> Varchar,
         comment -> Nullable<Text>,
-        score -> Int4,
+        score -> Float4,
         creationdate -> Timestamp,
         user_id -> Uuid,
         toilet_id -> Uuid,
+        score_clean -> Nullable<Float4>,
+        score_time -> Nullable<Float4>,
+        score_global -> Nullable<Float4>,
     }
 }
 

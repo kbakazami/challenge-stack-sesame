@@ -27,3 +27,17 @@ pub struct NewUsers {
     pub token: Option<String>,
     pub role_id: i32
 }
+
+
+#[derive(Queryable, Selectable, Serialize)]
+#[diesel(table_name = crate::schema::users)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct UsersWithoutToken {
+    pub id: uuid::Uuid,
+    pub civility: i32,
+    pub lastname: String,
+    pub firstname: String,
+    pub birthdate: NaiveDate,
+    pub email: String,
+    pub role_id: i32
+}
