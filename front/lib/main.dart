@@ -4,12 +4,13 @@ import 'package:front/providers/user.dart';
 import 'package:front/views/homepage/homepage.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
+import 'package:hive_flutter/hive_flutter.dart';
 import 'constants/colors.dart';
 
 Future<void> main() async {
   await dotenv.load(fileName: ".env");
-
+  await Hive.initFlutter();
+  await Hive.openBox('customer');
   runApp(const MyApp());
 }
 
