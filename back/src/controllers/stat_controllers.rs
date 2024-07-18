@@ -26,3 +26,15 @@ pub async fn get_log_nb_passage(
         }
     }
 }
+
+pub async fn get_affluence(
+    state: web::Data<AppState>,
+) -> impl Responder {
+    match stat_services::get_affluence(state.get_conn()).await
+    {
+        Ok(vec_number) => HttpResponse::Ok().json(vec_number),
+        Err(err) => {
+            HttpResponse::InternalServerError().body(format!("Failed to get affluence: {}", err))
+        }
+    }
+}
