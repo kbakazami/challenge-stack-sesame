@@ -35,7 +35,7 @@ class _LoginState extends State<Login> {
           "username" : account?.displayName,
           "email": account?.email,
           "photoUrl": account?.photoUrl,
-          "role": "USER"
+          "role": "ADMIN"
         };
       });
     });
