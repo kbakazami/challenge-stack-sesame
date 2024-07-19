@@ -1,3 +1,4 @@
+use actix::{Actor, Addr};
 use ::r2d2::PooledConnection;
 use actix_cors::Cors;
 use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
@@ -7,28 +8,28 @@ use diesel::prelude::*;
 use diesel::r2d2::{self, ConnectionManager};
 use r2d2::Pool;
 use std::env;
-use websocket::websocket::MyWebSocket;
+use websocket::websocket::{ws_handler,NotificationServer};
+use diesel::pg::PgConnection;
+
 mod controllers;
 mod middlewares;
 mod models;
 mod schema;
 mod websocket;
 
-/// WebSocket handshake and start `MyWebSocket` actor.
-async fn echo_ws(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, Error> {
-    ws::start(MyWebSocket::new(), &req, stream)
-}
-
 #[derive(Clone)]
 struct AppState {
+    pub notification_server: Addr<NotificationServer>,
     pub conn: Pool<ConnectionManager<PgConnection>>
 }
 impl AppState {
+
     pub fn get_conn(&self) -> PooledConnection<ConnectionManager<PgConnection>> {
         self.conn
             .get()
             .expect("Failed to get a connection from the pool.")
     }
+
 }
 mod services;
 
@@ -51,11 +52,14 @@ fn logging_setup() {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     logging_setup();
-
+    let notification_server: Addr<NotificationServer> = NotificationServer::new().start();
     let pool = get_pool();
     let state = AppState {
+        notification_server: notification_server.clone(),
         conn: pool
     };
+
+
     println!("Welcome to Rust Server! ");
 
     HttpServer::new(move || {
@@ -67,6 +71,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(cors)
             .app_data(web::Data::new(state.clone()))
+            .app_data(web::Data::new(notification_server.clone()))
             .service(
                 web::scope("/api")
                     .wrap(middlewares::auth_middleware::AuthMiddleware)
@@ -76,6 +81,8 @@ async fn main() -> std::io::Result<()> {
                     )
                     .service(
                         web::scope("/stats")
+                            .wrap(middlewares::auth_middleware::AuthMiddleware)
+
                             .route("/new", web::post().to(stat_controllers::create_log))
                             .route(
                                 "/get_nb_passage",
@@ -88,6 +95,7 @@ async fn main() -> std::io::Result<()> {
                     )
                     .service(
                         web::scope("/users")
+                            .wrap(middlewares::auth_middleware::AuthMiddleware)
                             .route("/new", web::post().to(users_controllers::create_user))
                             .route("/{id}", web::delete().to(users_controllers::delete_user))
                             .route("/{id}", web::get().to(users_controllers::get_user))
@@ -99,6 +107,7 @@ async fn main() -> std::io::Result<()> {
                     )
                     .service(
                         web::scope("/toilets")
+                            .wrap(middlewares::auth_middleware::AuthMiddleware)
                             .route("/", web::get().to(toilet_controllers::get_toilets))
                             .route("/{id}", web::get().to(toilet_controllers::get_toilet))
                             .route("/new", web::post().to(toilet_controllers::create_toilet))
@@ -108,10 +117,12 @@ async fn main() -> std::io::Result<()> {
                     )
                     .service(
                         web::scope("/role")
+                            .wrap(middlewares::auth_middleware::AuthMiddleware)
                             .route("", web::get().to(role_controllers::get_roles)),
                     )
                     .service(
                         web::scope("/feedback")
+                            .wrap(middlewares::auth_middleware::AuthMiddleware)
                             .route(
                                 "/new",
                                 web::post().to(feedback_controllers::create_feedback),
@@ -122,7 +133,7 @@ async fn main() -> std::io::Result<()> {
                             ),
                     ),
             )
-            .service(web::scope("/ws").route("", web::get().to(echo_ws)))
+            .route("/ws", web::get().to(ws_handler))
     })
     .bind(("0.0.0.0", 8080))?
     .run()

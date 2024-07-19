@@ -1,6 +1,6 @@
 use actix_web::{web, HttpResponse, Responder};
 
-use crate::{models::{logs::NewLogs, toilet::NewToilets}, services::{stat_services, toilet_services}, AppState};
+use crate::{models::{logs::NewLogs, toilet::NewToilets}, services::{stat_services, toilet_services, websocket_service::send_broadcast_message}, AppState};
 
 
 pub async fn create_toilet(
@@ -45,7 +45,11 @@ pub async fn open_toilet(
             };
 
             match stat_services::create_log(state.get_conn(), new_log).await {
-                Ok(inserted_log) => HttpResponse::Created().json(inserted_log),
+                Ok(inserted_log) => 
+                {
+                    send_broadcast_message(state.notification_server.clone(), toilet.id,toilet.state);
+                    HttpResponse::Created().json(inserted_log)
+                }
                 Err(err) => HttpResponse::InternalServerError().body(format!("Failed to insert logs: {}", err)),
             }
         }
@@ -66,7 +70,11 @@ pub async fn close_toilet(
             };
 
             match stat_services::create_log(state.get_conn(), new_log).await {
-                Ok(inserted_log) => HttpResponse::Created().json(inserted_log),
+                Ok(inserted_log) => 
+                {
+                    send_broadcast_message(state.notification_server.clone(), toilet.id,toilet.state);
+                    HttpResponse::Created().json(inserted_log)
+                }                
                 Err(err) => HttpResponse::InternalServerError().body(format!("Failed to insert logs: {}", err)),
             }
         }
