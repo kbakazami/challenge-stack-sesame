@@ -74,7 +74,6 @@ impl Handler<WsMessage> for WsSession {
 #[derive(Message)]
 #[rtype(result = "()")]
 pub struct SendGlobalNotification {
-    pub toilet_id: uuid::Uuid,
     pub toilet_state: i32,
 }
 pub struct NotificationServer {
@@ -83,7 +82,6 @@ pub struct NotificationServer {
 
 #[derive(Serialize)]
 struct ToiletNotification {
-    toilet_id: Uuid,
     toilet_state: i32,
 }
 
@@ -94,15 +92,9 @@ impl NotificationServer {
         }
     }
 
-    fn send_global_notification(&self, toilet_id: uuid::Uuid, toilet_state: i32) {
-        let notification = ToiletNotification {
-            toilet_id,
-            toilet_state,
-        };
-        let json_message = serde_json::to_string(&notification)
-            .expect("Failed to serialize notification to JSON");
+    fn send_global_notification(&self, toilet_state: i32) {
         for addr in &self.sessions {
-            addr.do_send(WsMessage(json_message.clone()));
+            addr.do_send(WsMessage(toilet_state.to_string().clone()));
         }
     }
 }
@@ -111,7 +103,7 @@ impl Handler<SendGlobalNotification> for NotificationServer {
     type Result = ();
 
     fn handle(&mut self, item: SendGlobalNotification, _: &mut Context<Self>) {
-        self.send_global_notification( item.toilet_id, item.toilet_state);
+        self.send_global_notification(item.toilet_state);
     }
 }
 
