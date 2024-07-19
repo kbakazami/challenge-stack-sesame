@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:front/views/bathroom/details.dart';
 import 'package:front/views/client/dashboard.dart';
 import 'package:front/views/customer/qrcode.dart';
 import 'package:front/views/homepage/widgets/navbar-icons.dart';
@@ -104,11 +105,19 @@ class _HomePageState extends State<HomePage> {
       onGenerateRoute: (RouteSettings setting) {
         if(setting.name != "/") {
           switch(setting.name) {
+            case "bathrooms-list" :
+              _selectedIndex = 0;
+              return MaterialPageRoute(builder: (_) => const BathroomsList());
+
             case "login":
               return MaterialPageRoute(builder: (_) => const Login());
 
             case "account":
               return MaterialPageRoute(builder: (_) => const Account());
+
+            case "bathroom-detail":
+              dynamic bathroomId = setting.arguments;
+              return MaterialPageRoute(builder: (_) => BathroomDetail(bathroomId));
           }
         } else {
           return MaterialPageRoute(builder: (_) => _widgetOptions.elementAt(_selectedIndex));
