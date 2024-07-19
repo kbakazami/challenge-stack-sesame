@@ -1,10 +1,8 @@
 use actix::{Actor, Addr};
 use ::r2d2::PooledConnection;
 use actix_cors::Cors;
-use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
-use actix_web_actors::ws;
+use actix_web::{web, App, HttpServer};
 use controllers::{feedback_controllers, role_controllers, stat_controllers, toilet_controllers, users_controllers};
-use diesel::prelude::*;
 use diesel::r2d2::{self, ConnectionManager};
 use r2d2::Pool;
 use std::env;

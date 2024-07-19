@@ -47,7 +47,7 @@ pub async fn open_toilet(
             match stat_services::create_log(state.get_conn(), new_log).await {
                 Ok(inserted_log) => 
                 {
-                    send_broadcast_message(state.notification_server.clone(), toilet.id,toilet.state);
+                    send_broadcast_message(state.notification_server.clone(),(toilet.state));
                     HttpResponse::Created().json(inserted_log)
                 }
                 Err(err) => HttpResponse::InternalServerError().body(format!("Failed to insert logs: {}", err)),
@@ -72,7 +72,7 @@ pub async fn close_toilet(
             match stat_services::create_log(state.get_conn(), new_log).await {
                 Ok(inserted_log) => 
                 {
-                    send_broadcast_message(state.notification_server.clone(), toilet.id,toilet.state);
+                    send_broadcast_message(state.notification_server.clone(), toilet.state);
                     HttpResponse::Created().json(inserted_log)
                 }                
                 Err(err) => HttpResponse::InternalServerError().body(format!("Failed to insert logs: {}", err)),
