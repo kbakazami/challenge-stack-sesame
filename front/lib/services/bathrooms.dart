@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:front/models/bathrooms.dart';
+
+import 'hive.dart';
 
 Future<List<Bathrooms>> getAllBathrooms() async {
 
@@ -53,10 +54,4 @@ Future<Bathrooms> getBathroomById(bathroomId) async {
   });
 
   return Bathrooms.fromMap(arrayBathrooms);
-}
-
-Future<dynamic> initHiveBox() async {
-  final box = await Hive.openBox('customer');
-  final token = box.get('token');
-  return token;
 }

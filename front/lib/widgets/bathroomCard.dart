@@ -67,7 +67,8 @@ class _BathroomCardState extends State<BathroomCard> {
                       onTap: (() => Navigator.pushNamed(context, 'bathroom-detail', arguments: bathrooms[index].id)),
                       child: Container(
                         decoration: BoxDecoration(
-                            color: customBackgroundColor(bathrooms[index].state)
+                            color: customBackgroundColor(bathrooms[index].state),
+                          borderRadius: BorderRadius.all(Radius.circular(6)),
                         ),
                         padding: const EdgeInsets.all(10),
                         child: Column(
