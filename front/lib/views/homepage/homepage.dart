@@ -44,7 +44,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final User? user = Provider.of<UserProvider>(context).user;
-    if(user != null && user.role != 'ADMIN')
+    if(user != null && user.role == "USER")
     {
       return Scaffold(
         extendBody: true,

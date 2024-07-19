@@ -101,8 +101,4 @@ class Dashboard extends StatelessWidget {
 
     );
   }
-
-  Widget DashboardContent () {
-    return Text('contenu');
-  }
 }

@@ -1,9 +1,11 @@
 class User {
+  String? id;
   String? email;
   String? username;
   String? role;
   String? photoUrl;
   User ({
+    this.id,
     this.email,
     this.username,
     this.photoUrl,
@@ -11,8 +13,9 @@ class User {
   });
 
   User.fromJson(Map<String, dynamic> json)
-      : username = json['username'],
+      : id = json['id'],
         email = json['email'],
+        username = json['username'],
         photoUrl = json['photoUrl'],
         role = json['role'];
 }
