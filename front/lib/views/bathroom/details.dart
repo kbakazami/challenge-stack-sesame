@@ -16,7 +16,8 @@ class BathroomDetail extends StatefulWidget {
   _BathroomDetailState createState() => _BathroomDetailState();
 }
 
-class _BathroomDetailState extends State<BathroomDetail> with TickerProviderStateMixin {
+class _BathroomDetailState extends State<BathroomDetail>
+    with TickerProviderStateMixin {
   late final AnimationController _controller;
   final _channel = WebSocketChannel.connect(
     Uri.parse('ws://127.0.0.1:8080/ws'),
@@ -74,13 +75,14 @@ class _BathroomDetailState extends State<BathroomDetail> with TickerProviderStat
       ),
       body: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
-          child: FutureBuilder<Bathrooms> (
+          child: FutureBuilder<Bathrooms>(
               future: futureBathroom,
-              builder: (context, snapshot){
-                if(snapshot.hasError) {
-                  return const Text('Une erreur est survenue, veuillez réessayer.');
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return const Text(
+                      'Une erreur est survenue, veuillez réessayer.');
                 }
-                if(!snapshot.hasData) {
+                if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
                 }
                 final bathroom = snapshot.data;
@@ -128,7 +130,16 @@ class _BathroomDetailState extends State<BathroomDetail> with TickerProviderStat
                               Row(
                                 children: [
                                   const Text('Statut du sanitaire '),
-                                  customText(bathroom.state),
+                                  StreamBuilder(
+                                    stream: _channel.stream,
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        return Text(customText(
+                                            int.parse(snapshot.data)));
+                                      }
+                                      return Text(customText(bathroom.state));
+                                    },
+                                  )
                                 ],
                               )
                             ],
@@ -141,7 +152,9 @@ class _BathroomDetailState extends State<BathroomDetail> with TickerProviderStat
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         onPressed: _toggleAnimation,
-                        icon: Icon(_isAnimationPlaying ? Icons.pause : Icons.play_arrow),
+                        icon: Icon(_isAnimationPlaying
+                            ? Icons.pause
+                            : Icons.play_arrow),
                         label: Text(_buttonText),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 20),
@@ -155,24 +168,22 @@ class _BathroomDetailState extends State<BathroomDetail> with TickerProviderStat
                     ),
                   ],
                 );
-              }
-          )
-      ),
+              })),
     );
   }
 
   customText(state) {
     switch (state) {
-      case 1 :
-        return const Text("Occupé");
-      case 2 :
-        return const Text("Disponible");
-      case 3 :
-        return const Text("Entretien");
-      case 4 :
-        return const Text("Maintenance");
-      case 5 :
-        return const Text("Ouverture");
+      case 1:
+        return "Occupé";
+      case 2:
+        return "Disponible";
+      case 3:
+        return "Entretien";
+      case 4:
+        return "Maintenance";
+      case 5:
+        return "Ouverture";
     }
   }
 }
