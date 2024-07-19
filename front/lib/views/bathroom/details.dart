@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-
+import 'package:web_socket_channel/web_socket_channel.dart';
 import '../../models/bathrooms.dart';
 import '../../services/bathrooms.dart';
 
@@ -18,6 +18,9 @@ class BathroomDetail extends StatefulWidget {
 
 class _BathroomDetailState extends State<BathroomDetail> with TickerProviderStateMixin {
   late final AnimationController _controller;
+  final _channel = WebSocketChannel.connect(
+    Uri.parse('ws://127.0.0.1:8080/ws'),
+  );
   late Future<Bathrooms> futureBathroom;
 
   bool _isAnimationPlaying = true;
