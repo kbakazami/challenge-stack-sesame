@@ -116,18 +116,18 @@ pub async fn get_affluence(
 async fn is_user_admin(
     access_token: String,
     conn: &mut PooledConnection<ConnectionManager<PgConnection>>,
-) -> Result<bool, Error> {
+) -> Result<bool, bool> {
     let get_user_token = users_services::get_user_token(conn, access_token).await;
     match get_user_token {
         Ok(user) => {
-            if user.role_id == 1 {
+            if user.role_id == 1 || user.role_id == 3{
                 return Ok(true);
             } else {
-                return Ok(false);
+                return Err(false);
             }
         }
-        Err(err) => {
-            return Err(err);
+        Err(_) => {
+            return Err(false);
         }
     }
 }

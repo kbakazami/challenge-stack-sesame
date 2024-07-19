@@ -20,7 +20,7 @@ pub async fn get_log_nb_passage(
     state: web::Data<AppState>,
 ) -> impl Responder {
 
-    let token = get_splitted_token(req).unwrap();
+    let token = get_token(req).unwrap();
 
     match stat_services::get_log_nb_passage(token, state.get_conn()).await
     {
@@ -36,7 +36,7 @@ pub async fn get_affluence(
     state: web::Data<AppState>,
 ) -> impl Responder {
 
-    let token = get_splitted_token(req).unwrap();
+    let token = get_token(req).unwrap();
 
 
     match stat_services::get_affluence(token,state.get_conn()).await
@@ -48,13 +48,12 @@ pub async fn get_affluence(
     }
 }
 
-fn get_splitted_token(req: HttpRequest) -> Result<String, HttpResponse> {
+fn get_token(req: HttpRequest) -> Result<String, HttpResponse> {
     let headers = req.headers();
     let token_authorization = headers.get(actix_web::http::header::AUTHORIZATION);
     match token_authorization {
         Some(access_token) => {
-            let access_token_splitted = access_token.to_str().unwrap().split_whitespace();
-            Ok(access_token_splitted.last().unwrap().to_string())
+            Ok(access_token.to_str().unwrap().to_string())
         }
         None => {
             Err(HttpResponse::InternalServerError().body("No User info provided by google"))
