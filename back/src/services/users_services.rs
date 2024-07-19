@@ -75,6 +75,24 @@ pub async fn get_user(
     }
 }
 
+pub async fn get_user_token(
+    conn: &mut PooledConnection<ConnectionManager<PgConnection>>,
+    new_token: String,
+) -> Result<UsersWithoutToken, Error> {
+    match users.filter(token.eq(new_token)).get_result::<Users>(conn) {
+        Ok(user) => Ok(UsersWithoutToken {
+            id: user.id,
+            firstname: user.firstname.clone(),
+            lastname: user.lastname.clone(),
+            email: user.email.clone(),
+            birthdate: user.birthdate,
+            civility: user.civility,
+            role_id: user.role_id,
+        }),
+        Err(err) => return Err(err),
+    }
+}
+
 pub async fn get_users(
     mut conn: PooledConnection<ConnectionManager<PgConnection>>,
 ) -> Result<Vec<UsersWithoutToken>, Error> {
