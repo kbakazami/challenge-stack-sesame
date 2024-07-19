@@ -1,5 +1,4 @@
 use diesel::prelude::*;
-use postgis_diesel::types::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Queryable, Selectable, Serialize)]
@@ -9,8 +8,9 @@ pub struct Toilets {
     pub id: uuid::Uuid,
     pub label: String,
     pub state: i32,
-    pub coordinates: Point,
+    pub coordinates: postgis_diesel::types::Point,
     pub idlock: Option<uuid::Uuid>,
+    pub secret: Option<String>,
 }
 
 #[derive(Insertable, Deserialize, Serialize)]
@@ -18,6 +18,7 @@ pub struct Toilets {
 pub struct NewToilets {
     pub label: String,
     pub state: i32,
-    pub coordinates: Point,
+    pub coordinates: postgis_diesel::types::Point,
     pub idlock: Option<uuid::Uuid>,
+    pub secret: Option<String>,
 }

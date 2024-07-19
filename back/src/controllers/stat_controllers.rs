@@ -1,0 +1,100 @@
+use actix_web::{web, HttpRequest, HttpResponse, Responder};
+use diesel::{r2d2::ConnectionManager, PgConnection};
+use r2d2::PooledConnection;
+
+use crate::{models::logs::NewLogs, services::{stat_services, users_services}, AppState};
+
+pub async fn create_log(
+    state: web::Data<AppState>,
+    new_log: web::Json<NewLogs>,
+) -> impl Responder {
+    match stat_services::create_log(state.get_conn(), new_log.into_inner()).await
+    {
+        Ok(inserted_log) => HttpResponse::Created().json(inserted_log),
+        Err(err) => {
+            HttpResponse::InternalServerError().body(format!("Failed to insert logs: {}", err))
+        }
+    }
+}
+
+pub async fn get_log_nb_passage(
+    req: HttpRequest,
+    state: web::Data<AppState>,
+) -> impl Responder {
+
+    let token = get_token(req).unwrap();
+
+    match is_user_admin(token, state.get_conn()).await {
+        Ok(_) => {
+            match stat_services::get_log_nb_passage(state.get_conn()).await
+            {
+                Ok(vec_number) => HttpResponse::Ok().json(vec_number),
+                Err(err) => {
+                    HttpResponse::InternalServerError().body(format!("Failed to get logs: {}", err))
+                }
+            }
+        },
+        Err(err) => {
+            err
+        }
+    }
+
+    
+}
+
+pub async fn get_affluence(
+    req: HttpRequest,
+    state: web::Data<AppState>,
+) -> impl Responder {
+
+    let token = get_token(req).unwrap();
+
+    match is_user_admin(token, state.get_conn()).await {
+        Ok(_) => {
+            match stat_services::get_affluence(state.get_conn()).await
+            {
+                Ok(vec_number) => HttpResponse::Ok().json(vec_number),
+                Err(err) => {
+                    HttpResponse::InternalServerError().body(format!("Failed to get affluence: {}", err))
+                }
+            }
+        },
+        Err(err) => {
+            err
+        }
+    }
+
+   
+}
+
+fn get_token(req: HttpRequest) -> Result<String, HttpResponse> {
+    let headers = req.headers();
+    let token_authorization = headers.get(actix_web::http::header::AUTHORIZATION);
+    match token_authorization {
+        Some(access_token) => {
+            Ok(access_token.to_str().unwrap().to_string())
+        }
+        None => {
+            Err(HttpResponse::InternalServerError().body("No User info provided by google"))
+        }
+    }
+}
+
+async fn is_user_admin(
+    access_token: String,
+    mut conn: PooledConnection<ConnectionManager<PgConnection>>,
+) -> Result<bool, HttpResponse> {
+    let get_user_token = users_services::get_user_token(&mut conn, access_token).await;
+    match get_user_token {
+        Ok(user) => {
+            if user.role_id == 1 || user.role_id == 3{
+                return Ok(true);
+            } else {
+                return Err(HttpResponse::Unauthorized().body("You are not an admin"));
+            }
+        }
+        Err(_) => {
+            return Err(HttpResponse::InternalServerError().body("Error while getting user"));
+        }
+    }
+}

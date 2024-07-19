@@ -1,17 +1,14 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
+import 'package:front/widgets/profile.dart';
 
 class Account extends StatelessWidget {
+
+  static String routeName = '/account';
 
   const Account({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 15),
-      alignment: Alignment.center,
-      child: const Text('Page compte customer'),
-    );
+    return const Profile('Contacter l\'administration', 'phone.svg');
   }
 }
