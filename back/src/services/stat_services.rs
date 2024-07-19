@@ -5,7 +5,7 @@ use r2d2::PooledConnection;
 use crate::{
     models::{
         logs::{Logs, NewLogs},
-        toiletStatus::ToiletStatus,
+        toilet_status::ToiletStatus,
     },
     schema::{
         logs::{
