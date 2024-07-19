@@ -14,11 +14,9 @@ Modify docker-compose.yaml (if necessery)
 	    POSTGRES_USER: myuser (db user)
 	    POSTGRES_PASSWORD: mypassword (db password)
 	    POSTGRES_DB: mydatabase (db name)
-Modify .env files
+Create .env file
 
     DATABASE_URL=postgres://myuser:mypassword@postgres/mydatabase
-    CLIENT_ID=XXX
-    CLIENT_SECRET=XXX
 
 Next use this command to create container
 
@@ -26,6 +24,11 @@ Next use this command to create container
 Go to "front" directory
 
     cd ../front
+ Create .env file
+
+    CLIENT_ID=XXX
+    CLIENT_SECRET=XXX
+
 Install Flutter dependencies
 
     flutter pub get
