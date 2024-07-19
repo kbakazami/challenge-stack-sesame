@@ -1,6 +1,8 @@
 use actix_web::{web, HttpRequest, HttpResponse, Responder};
+use diesel::{r2d2::ConnectionManager, PgConnection};
+use r2d2::PooledConnection;
 
-use crate::{models::logs::NewLogs, services::stat_services, AppState};
+use crate::{models::logs::NewLogs, services::{stat_services, users_services}, AppState};
 
 pub async fn create_log(
     state: web::Data<AppState>,
@@ -22,13 +24,22 @@ pub async fn get_log_nb_passage(
 
     let token = get_token(req).unwrap();
 
-    match stat_services::get_log_nb_passage(token, state.get_conn()).await
-    {
-        Ok(vec_number) => HttpResponse::Ok().json(vec_number),
+    match is_user_admin(token, state.get_conn()).await {
+        Ok(_) => {
+            match stat_services::get_log_nb_passage(state.get_conn()).await
+            {
+                Ok(vec_number) => HttpResponse::Ok().json(vec_number),
+                Err(err) => {
+                    HttpResponse::InternalServerError().body(format!("Failed to get logs: {}", err))
+                }
+            }
+        },
         Err(err) => {
-            HttpResponse::InternalServerError().body(format!("Failed to get logs: {}", err))
+            err
         }
     }
+
+    
 }
 
 pub async fn get_affluence(
@@ -38,14 +49,22 @@ pub async fn get_affluence(
 
     let token = get_token(req).unwrap();
 
-
-    match stat_services::get_affluence(token,state.get_conn()).await
-    {
-        Ok(vec_number) => HttpResponse::Ok().json(vec_number),
+    match is_user_admin(token, state.get_conn()).await {
+        Ok(_) => {
+            match stat_services::get_affluence(state.get_conn()).await
+            {
+                Ok(vec_number) => HttpResponse::Ok().json(vec_number),
+                Err(err) => {
+                    HttpResponse::InternalServerError().body(format!("Failed to get affluence: {}", err))
+                }
+            }
+        },
         Err(err) => {
-            HttpResponse::InternalServerError().body(format!("Failed to get affluence: {}", err))
+            err
         }
     }
+
+   
 }
 
 fn get_token(req: HttpRequest) -> Result<String, HttpResponse> {
@@ -57,6 +76,25 @@ fn get_token(req: HttpRequest) -> Result<String, HttpResponse> {
         }
         None => {
             Err(HttpResponse::InternalServerError().body("No User info provided by google"))
+        }
+    }
+}
+
+async fn is_user_admin(
+    access_token: String,
+    mut conn: PooledConnection<ConnectionManager<PgConnection>>,
+) -> Result<bool, HttpResponse> {
+    let get_user_token = users_services::get_user_token(&mut conn, access_token).await;
+    match get_user_token {
+        Ok(user) => {
+            if user.role_id == 1 || user.role_id == 3{
+                return Ok(true);
+            } else {
+                return Err(HttpResponse::Unauthorized().body("You are not an admin"));
+            }
+        }
+        Err(_) => {
+            return Err(HttpResponse::InternalServerError().body("Error while getting user"));
         }
     }
 }
