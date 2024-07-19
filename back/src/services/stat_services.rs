@@ -3,7 +3,7 @@ use diesel::{prelude::*, r2d2::ConnectionManager, result::Error};
 use r2d2::PooledConnection;
 
 use crate::{
-    models::{logs::{Logs, NewLogs}, toiletStatus::ToiletStatus},
+    models::{logs::{Logs, NewLogs}, toilet_status::ToiletStatus},
     schema::{
         logs::{
             creationdate,

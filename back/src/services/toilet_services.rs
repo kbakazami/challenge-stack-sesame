@@ -5,7 +5,7 @@ use rand::Rng;
 use crate::{
     models::{
         toilet::{NewToilets, Toilets},
-        toiletStatus::ToiletStatus,
+        toilet_status::ToiletStatus,
     },
     schema::toilet::{dsl::toilet, id, state},
 };
